@@ -1,0 +1,6 @@
+const assert=require('assert'),C=require('../dist/js/core.js');
+const items={wood:{weight:1},cord:{weight:.1},knife:{weight:.5}},quests=[{id:'q',xp:200,credits:10,objectives:[['craft',1,'Craft']]}];
+let s=C.freshState(quests);assert.equal(C.xpNeeded(1),150);assert.equal(C.xpNeeded(2),200);C.addXP(s,150);assert.equal(s.player.level,2);assert.equal(s.player.rank,1);
+s.player.credits=100;let p=C.purchase(s,{id:'knife',price:75,rank:1},items);assert(p.ok);assert.equal(s.player.credits,25);assert.equal(s.inventory.knife,1);assert(!C.purchase(s,{id:'knife',price:75,rank:1},items).ok);
+s.inventory.wood=2;let cr=C.craft(s,{id:'cord',rank:1,cost:{wood:2},makes:{cord:1},minutes:5},items);assert(cr.ok);assert.equal(s.inventory.wood,undefined);assert.equal(s.inventory.cord,1);assert(!C.craft(s,{id:'cord',rank:1,cost:{wood:2},makes:{cord:1},minutes:5},items).ok);
+C.track(s,'craft',1);let q=s.quests[0];assert(C.claimQuest(s,q));let credits=s.player.credits;assert(!C.claimQuest(s,q));assert.equal(s.player.credits,credits);let decoded=JSON.parse(JSON.stringify(s));assert.deepEqual(decoded.inventory,s.inventory);assert.equal(decoded.version,2);console.log('PASS: progression, purchasing, crafting, quest rewards, save round-trip');
